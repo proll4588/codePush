@@ -21,6 +21,7 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { Logger, CodePush } from './src';
+import { isNativeModuleAvailable } from './src/CodePushManager';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -46,27 +47,36 @@ function AppContent() {
 
   const initializeCodePush = async () => {
     try {
+      console.log('🔍 App: Инициализация Code Push...');
       Logger.info('Инициализация Code Push...');
 
       // Получаем информацию о платформе
+      console.log('🔍 App: Получаем информацию о платформе...');
       const platform = CodePush.getPlatformInfo();
+      console.log('🔍 App: Платформа:', platform);
       setPlatformInfo(platform);
 
       // Получаем текущую версию
+      console.log('🔍 App: Получаем текущую версию...');
       const version = await CodePush.getCurrentVersion();
+      console.log('🔍 App: Версия:', version);
       setCurrentVersion(version);
 
       Logger.success('Code Push инициализирован');
     } catch (error) {
+      console.error('🔍 App: Ошибка инициализации:', error);
       Logger.error('Ошибка инициализации:', error);
     }
   };
 
   const handleCheckUpdate = async () => {
+    console.log('🔍 App: Начинаем проверку обновлений...');
     setIsLoading(true);
     try {
       Logger.info('Проверка обновлений...');
+      console.log('🔍 App: Вызываем CodePush.checkForUpdate()...');
       const update = await CodePush.checkForUpdate();
+      console.log('🔍 App: Получен результат:', update);
       setUpdateInfo(update);
 
       if (update.hasUpdate) {
@@ -183,7 +193,9 @@ function AppContent() {
   return (
     <ScrollView style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Code Push Test123321</Text>
+        <Text style={styles.title}>
+          Code Push Test {String(isNativeModuleAvailable)} v3
+        </Text>
 
         {/* Информация о платформе */}
         <View style={styles.section}>

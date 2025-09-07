@@ -5,7 +5,7 @@ import React
 class CodePushManager: NSObject {
   
   // MARK: - Constants
-  private let serverURL = "http://localhost:3000"
+  private let serverURL = "http://192.168.0.160:3000"
   private let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
   private let codePushPath: URL
   
@@ -63,38 +63,43 @@ class CodePushManager: NSObject {
   
   @objc
   func checkForUpdate(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    guard let currentMetadata = loadMetadata() else {
-      // Если нет метаданных, считаем что это первая версия
-      resolve([
-        "hasUpdate": false,
-        "message": "Нет сохраненных обновлений"
-      ])
-      return
-    }
+    print("🔍 CodePush Swift: Начинаем проверку обновлений...")
     
-    let currentVersion = currentMetadata["version"] as? String ?? "0"
+    // Всегда пытаемся проверить обновления на сервере, даже если нет метаданных
+    let currentVersion = "0" // По умолчанию версия 0
     let platform = "ios"
     
-    guard let url = URL(string: "\(serverURL)/api/check-update?currentVersion=\(currentVersion)&platform=\(platform)") else {
+    let urlString = "\(serverURL)/api/check-update?currentVersion=\(currentVersion)&platform=\(platform)"
+    print("🔍 CodePush Swift: URL запроса:", urlString)
+    
+    guard let url = URL(string: urlString) else {
+      print("🔍 CodePush Swift: Ошибка создания URL")
       reject("INVALID_URL", "Неверный URL сервера", nil)
       return
     }
     
+    print("🔍 CodePush Swift: Отправляем запрос на сервер...")
     let task = URLSession.shared.dataTask(with: url) { data, response, error in
       if let error = error {
+        print("🔍 CodePush Swift: Ошибка сети:", error.localizedDescription)
         reject("NETWORK_ERROR", "Ошибка сети: \(error.localizedDescription)", error)
         return
       }
       
       guard let data = data else {
+        print("🔍 CodePush Swift: Нет данных от сервера")
         reject("NO_DATA", "Нет данных от сервера", nil)
         return
       }
       
+      print("🔍 CodePush Swift: Получены данные от сервера, размер:", data.count)
+      
       do {
         let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+        print("🔍 CodePush Swift: Парсинг JSON успешен:", json)
         resolve(json)
       } catch {
+        print("🔍 CodePush Swift: Ошибка парсинга JSON:", error.localizedDescription)
         reject("JSON_ERROR", "Ошибка парсинга JSON: \(error.localizedDescription)", error)
       }
     }

@@ -21,7 +21,12 @@ interface CodePushNativeModule extends CodePushManagerInterface {
 const { CodePushManager } = NativeModules;
 
 // Проверяем доступность нативного модуля
-const isNativeModuleAvailable = CodePushManager != null;
+export const isNativeModuleAvailable = CodePushManager != null;
+
+// Логируем информацию о нативном модуле
+console.log('🔍 CodePush: NativeModules:', Object.keys(NativeModules));
+console.log('🔍 CodePush: CodePushManager:', CodePushManager);
+console.log('🔍 CodePush: isNativeModuleAvailable:', isNativeModuleAvailable);
 
 // Fallback реализация для случаев, когда нативный модуль недоступен
 class CodePushManagerFallback implements CodePushManagerInterface {
@@ -33,22 +38,36 @@ class CodePushManagerFallback implements CodePushManagerInterface {
   }
 
   async checkForUpdate(): Promise<CodePushUpdate> {
-    console.warn('CodePush: Нативный модуль недоступен, используем fallback');
+    console.warn(
+      '🔍 CodePush: Нативный модуль недоступен, используем fallback',
+    );
 
     try {
-      // Пытаемся проверить обновления через fetch
-      const response = await fetch(
-        'http://192.168.0.160:3000/api/check-update?currentVersion=0&platform=ios',
-      );
-      const data = await response.json();
+      const url =
+        'http://192.168.0.160:3000/api/check-update?currentVersion=0&platform=ios';
+      console.log('CodePush: Отправляем запрос на:', url);
 
+      // Пытаемся проверить обновления через fetch
+      const response = await fetch(url);
+
+      console.log(
+        'CodePush: Получен ответ:',
+        response.status,
+        response.statusText,
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
       console.log('CodePush: Fallback проверка обновлений:', data);
       return data;
     } catch (error) {
       console.error('CodePush: Ошибка fallback проверки:', error);
       return {
         hasUpdate: false,
-        message: 'Ошибка подключения к серверу',
+        message: `Ошибка подключения к серверу: ${error.message}`,
       };
     }
   }
@@ -109,12 +128,17 @@ export class CodePush {
   // Проверить наличие обновлений
   public async checkForUpdate(): Promise<CodePushUpdate> {
     try {
-      console.log('CodePush: Проверка обновлений...');
+      console.log('🔍 CodePush: Проверка обновлений...');
+      console.log('🔍 CodePush: Менеджер:', this.manager);
+      console.log(
+        '🔍 CodePush: Нативный модуль доступен:',
+        isNativeModuleAvailable,
+      );
       const result = await this.manager.checkForUpdate();
-      console.log('CodePush: Результат проверки:', result);
+      console.log('🔍 CodePush: Результат проверки:', result);
       return result;
     } catch (error) {
-      console.error('CodePush: Ошибка при проверке обновлений:', error);
+      console.error('🔍 CodePush: Ошибка при проверке обновлений:', error);
       return {
         hasUpdate: false,
         message: `Ошибка: ${error}`,

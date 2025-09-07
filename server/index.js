@@ -74,7 +74,8 @@ app.get('/api/check-update', (req, res) => {
   // Проверяем, есть ли обновление
   const hasUpdate =
     !currentVersion ||
-    new Date(latestUpdate.createdAt) > new Date(currentVersion);
+    currentVersion === '0' ||
+    latestUpdate.version !== currentVersion;
 
   if (hasUpdate) {
     res.json({

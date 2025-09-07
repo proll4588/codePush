@@ -12,8 +12,8 @@
 		68081EBE899DE36369CDCE54 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		9B429F0B2E6DEB2A007622C0 /* CodePushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B429F0A2E6DEB29007622C0 /* CodePushManager.swift */; };
-		9B429F0C2E6DEB2A007622C0 /* CodePushManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B429F092E6DEB29007622C0 /* CodePushManager.m */; };
+		9B8C11C22E6DF772004CDDC2 /* CodePushManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 9B8C11BF2E6DF772004CDDC2 /* CodePushManager.m */; };
+		9B8C11C32E6DF772004CDDC2 /* CodePushManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B8C11C02E6DF772004CDDC2 /* CodePushManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,9 +26,9 @@
 		5DCACB8F33CDC322A6C60F78 /* libPods-codePush.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-codePush.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = codePush/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = codePush/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		9B429F092E6DEB29007622C0 /* CodePushManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CodePushManager.m; sourceTree = "<group>"; };
-		9B429F0A2E6DEB29007622C0 /* CodePushManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodePushManager.swift; sourceTree = "<group>"; };
 		9B429F0D2E6DEB2F007622C0 /* codePush-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "codePush-Bridging-Header.h"; sourceTree = "<group>"; };
+		9B8C11BF2E6DF772004CDDC2 /* CodePushManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CodePushManager.m; sourceTree = "<group>"; };
+		9B8C11C02E6DF772004CDDC2 /* CodePushManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodePushManager.swift; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -47,8 +47,7 @@
 		13B07FAE1A68108700A75B9A /* codePush */ = {
 			isa = PBXGroup;
 			children = (
-				9B429F092E6DEB29007622C0 /* CodePushManager.m */,
-				9B429F0A2E6DEB29007622C0 /* CodePushManager.swift */,
+				9B8C11C12E6DF772004CDDC2 /* CodePushManager */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
@@ -95,6 +94,15 @@
 				13B07F961A680F5B00A75B9A /* codePush.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		9B8C11C12E6DF772004CDDC2 /* CodePushManager */ = {
+			isa = PBXGroup;
+			children = (
+				9B8C11BF2E6DF772004CDDC2 /* CodePushManager.m */,
+				9B8C11C02E6DF772004CDDC2 /* CodePushManager.swift */,
+			);
+			path = CodePushManager;
 			sourceTree = "<group>";
 		};
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
@@ -254,8 +262,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9B429F0B2E6DEB2A007622C0 /* CodePushManager.swift in Sources */,
-				9B429F0C2E6DEB2A007622C0 /* CodePushManager.m in Sources */,
+				9B8C11C22E6DF772004CDDC2 /* CodePushManager.m in Sources */,
+				9B8C11C32E6DF772004CDDC2 /* CodePushManager.swift in Sources */,
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
