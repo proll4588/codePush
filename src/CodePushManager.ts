@@ -27,17 +27,30 @@ const isNativeModuleAvailable = CodePushManager != null;
 class CodePushManagerFallback implements CodePushManagerInterface {
   getConstants(): CodePushConstants {
     return {
-      serverURL: 'http://localhost:3000',
+      serverURL: 'http://192.168.0.160:3000',
       codePushPath: '/tmp/CodePush',
     };
   }
 
   async checkForUpdate(): Promise<CodePushUpdate> {
     console.warn('CodePush: Нативный модуль недоступен, используем fallback');
-    return {
-      hasUpdate: false,
-      message: 'Нативный модуль CodePush недоступен',
-    };
+
+    try {
+      // Пытаемся проверить обновления через fetch
+      const response = await fetch(
+        'http://192.168.0.160:3000/api/check-update?currentVersion=0&platform=ios',
+      );
+      const data = await response.json();
+
+      console.log('CodePush: Fallback проверка обновлений:', data);
+      return data;
+    } catch (error) {
+      console.error('CodePush: Ошибка fallback проверки:', error);
+      return {
+        hasUpdate: false,
+        message: 'Ошибка подключения к серверу',
+      };
+    }
   }
 
   async downloadUpdate(): Promise<CodePushDownloadResult> {

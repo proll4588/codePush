@@ -5,7 +5,7 @@ import React
 class CodePushManager: NSObject {
   
   // MARK: - Constants
-  private let serverURL = "http://192.168.0.160:3000"
+  private let serverURL = "http://localhost:3000"
   private let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
   private let codePushPath: URL
   

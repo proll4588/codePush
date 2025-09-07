@@ -6,7 +6,7 @@ import {
 
 // Конфигурация сервера
 export const SERVER_CONFIG = {
-  baseURL: 'http://localhost:3000',
+  baseURL: 'http://192.168.0.160:3000',
   timeout: 30000, // 30 секунд
   retryAttempts: 3,
   retryDelay: 1000, // 1 секунда

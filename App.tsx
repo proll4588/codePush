@@ -20,7 +20,7 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import CodePush, { Logger } from './src';
+import { Logger, CodePush } from './src';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -183,7 +183,7 @@ function AppContent() {
   return (
     <ScrollView style={[styles.container, { paddingTop: safeAreaInsets.top }]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Code Push Test</Text>
+        <Text style={styles.title}>Code Push Test123321</Text>
 
         {/* Информация о платформе */}
         <View style={styles.section}>
