@@ -1,97 +1,215 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Code Push для React Native
 
-# Getting Started
+Собственная реализация системы Code Push для React Native приложений без использования сторонних пакетов.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 🚀 Возможности
 
-## Step 1: Start Metro
+- ✅ **Серверная часть** - Node.js сервер для хранения и распространения обновлений
+- ✅ **iOS модуль** - Нативный Swift модуль для iOS
+- ✅ **JavaScript мост** - TypeScript интерфейс для взаимодействия
+- ✅ **Автоматические обновления** - Фоновая загрузка и применение обновлений
+- ✅ **Версионирование** - Управление версиями обновлений
+- ✅ **Fallback** - Автоматический возврат к встроенному bundle при ошибках
+- ✅ **Тестовое приложение** - Готовое приложение для тестирования
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## 📁 Структура проекта
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+```
+codePush/
+├── server/                    # Серверная часть
+│   ├── index.js              # Express сервер
+│   ├── package.json          # Зависимости сервера
+│   ├── uploads/              # Папка с bundle файлами
+│   └── README.md             # Документация сервера
+├── src/                      # JavaScript/TypeScript код
+│   ├── CodePushManager.ts    # Основной менеджер
+│   ├── types.ts              # TypeScript типы
+│   ├── utils.ts              # Утилиты
+│   └── index.ts              # Экспорты
+├── ios/                      # iOS нативный код
+│   ├── codePush/
+│   │   ├── CodePushManager/  # Нативный модуль
+│   │   │   ├── CodePushManager.swift
+│   │   │   └── CodePushManager.m
+│   │   └── AppDelegate.swift # Модифицированный AppDelegate
+│   └── README.md             # Документация iOS
+├── App.tsx                   # Тестовое приложение
+└── README.md                 # Этот файл
+```
 
-```sh
-# Using npm
+## 🛠️ Установка и настройка
+
+### 1. Запуск сервера
+
+```bash
+cd server
+npm install
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
-## Step 2: Build and run your app
+Сервер будет доступен по адресу: `http://localhost:3000`
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### 2. Настройка iOS
 
-### Android
+1. Откройте проект в Xcode
+2. Добавьте файлы из папки `ios/codePush/CodePushManager/` в проект
+3. Убедитесь, что файлы добавлены в target приложения
 
-```sh
-# Using npm
-npm run android
+### 3. Запуск приложения
 
-# OR using Yarn
-yarn android
+```bash
+# iOS
+npx react-native run-ios
+
+# Android (будет реализовано позже)
+npx react-native run-android
 ```
 
-### iOS
+## 📖 Использование
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+### Базовое использование
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+```typescript
+import CodePush from './src';
 
-```sh
-bundle install
+// Проверить обновления
+const updateInfo = await CodePush.checkForUpdate();
+if (updateInfo.hasUpdate) {
+  console.log('Найдено обновление:', updateInfo.version);
+
+  // Скачать обновление
+  const result = await CodePush.downloadUpdate();
+  if (result.success) {
+    console.log('Обновление загружено!');
+    // Перезапустите приложение для применения
+  }
+}
 ```
 
-Then, and every time you update your native dependencies, run:
+### Автоматическая синхронизация
 
-```sh
-bundle exec pod install
+```typescript
+// Автоматическая проверка и загрузка
+await CodePush.sync();
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### Получение информации
 
-```sh
-# Using npm
-npm run ios
+```typescript
+// Текущая версия
+const version = await CodePush.getCurrentVersion();
 
-# OR using Yarn
-yarn ios
+// Путь к bundle
+const bundlePath = await CodePush.getBundlePath();
+
+// Константы
+const constants = CodePush.getConstants();
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+## 🔧 API
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+### Серверные endpoints
 
-## Step 3: Modify your app
+- `GET /api/status` - Статус сервера
+- `GET /api/check-update` - Проверка обновлений
+- `POST /api/upload` - Загрузка bundle
+- `GET /api/download/:filename` - Скачивание bundle
+- `GET /api/updates` - Список обновлений
+- `DELETE /api/updates/:id` - Удаление обновления
 
-Now that you have successfully run the app, let's make changes!
+### JavaScript API
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+- `checkForUpdate()` - Проверка обновлений
+- `downloadUpdate()` - Загрузка обновления
+- `getCurrentVersion()` - Текущая версия
+- `getBundlePath()` - Путь к bundle
+- `clearUpdates()` - Очистка обновлений
+- `sync()` - Автосинхронизация
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+## 🧪 Тестирование
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+### 1. Создание тестового bundle
 
-## Congratulations! :tada:
+```bash
+npx react-native bundle \
+  --platform ios \
+  --dev false \
+  --entry-file index.js \
+  --bundle-output server/test.bundle
+```
 
-You've successfully run and modified your React Native App. :partying_face:
+### 2. Загрузка на сервер
 
-### Now what?
+```bash
+curl -X POST \
+  -F "bundle=@server/test.bundle" \
+  -F "version=1703123456789" \
+  -F "platform=ios" \
+  -F "description=Тестовое обновление" \
+  http://localhost:3000/api/upload
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+### 3. Тестирование в приложении
 
-# Troubleshooting
+1. Запустите приложение
+2. Нажмите "Проверить обновления"
+3. Скачайте обновление
+4. Перезапустите приложение
+5. Проверьте, что загрузился новый bundle
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## 📱 Тестовое приложение
 
-# Learn More
+Приложение включает:
 
-To learn more about React Native, take a look at the following resources:
+- **Информация о платформе** - статус нативного модуля
+- **Текущая версия** - информация о версии и обновлениях
+- **Управление** - кнопки для всех операций
+- **Инструкции** - пошаговое руководство
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## 🔒 Безопасность
+
+- Валидация размера файлов (50MB лимит)
+- Проверка MIME-типа файлов
+- Безопасное сохранение в Documents директории
+- Автоматическая очистка при ошибках
+
+## ⚠️ Ограничения
+
+- Работает только в Release режиме (Debug использует Metro)
+- Требует перезапуск приложения для применения обновлений
+- Поддерживает только JavaScript обновления
+- iOS модуль готов, Android в разработке
+
+## 🚧 Roadmap
+
+- [ ] Android нативный модуль
+- [ ] Автоматическое применение обновлений
+- [ ] Rollback при ошибках
+- [ ] A/B тестирование
+- [ ] Постепенный rollout
+- [ ] Шифрование обновлений
+
+## 🤝 Вклад в проект
+
+1. Fork проекта
+2. Создайте feature branch
+3. Внесите изменения
+4. Добавьте тесты
+5. Создайте Pull Request
+
+## 📄 Лицензия
+
+MIT License
+
+## 📞 Поддержка
+
+При возникновении проблем:
+
+1. Проверьте логи в консоли
+2. Убедитесь, что сервер запущен
+3. Проверьте настройки сети
+4. Создайте Issue в репозитории
+
+---
+
+**Примечание**: Это учебный проект для демонстрации принципов работы Code Push. Для продакшн использования рекомендуется добавить дополнительные меры безопасности и оптимизации.

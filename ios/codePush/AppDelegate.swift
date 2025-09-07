@@ -42,7 +42,27 @@ class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
 #if DEBUG
     RCTBundleURLProvider.sharedSettings().jsBundleURL(forBundleRoot: "index")
 #else
-    Bundle.main.url(forResource: "main", withExtension: "jsbundle")
+    // Проверяем наличие Code Push обновления
+    if let codePushBundleURL = getCodePushBundleURL() {
+      print("CodePush: Загружаем bundle из Code Push: \(codePushBundleURL.path)")
+      return codePushBundleURL
+    }
+    
+    // Fallback на встроенный bundle
+    print("CodePush: Загружаем встроенный bundle")
+    return Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
+  }
+  
+  private func getCodePushBundleURL() -> URL? {
+    let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    let codePushPath = documentsPath.appendingPathComponent("CodePush")
+    let bundlePath = codePushPath.appendingPathComponent("main.jsbundle")
+    
+    if FileManager.default.fileExists(atPath: bundlePath.path) {
+      return bundlePath
+    }
+    
+    return nil
   }
 }
