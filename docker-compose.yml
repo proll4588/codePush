@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  codepush-server:
+    # Имя контейнера для удобства
+    container_name: codepush-server
+    
+    # Указываем Docker собирать образ из папки server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    
+    # Перезапускать контейнер автоматически в случае сбоя
+    restart: unless-stopped
+    
+    # Пробрасываем порт 3000 из контейнера на порт 3000 вашего компьютера
+    ports:
+      - "3000:3000"
+      
+    # Монтируем volumes для постоянного хранения данных
+    volumes:
+      # Папка с загруженными бандлами
+      - ./server/uploads:/usr/src/app/uploads
+      # Файл базы данных SQLite
+      - ./server/database.sqlite3:/usr/src/app/database.sqlite3
+      
+    # Устанавливаем переменные окружения, если потребуется
+    environment:
+      - NODE_ENV=development
