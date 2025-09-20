@@ -37,6 +37,7 @@ export interface CodePushManagerInterface {
   getCurrentVersion(): Promise<CodePushVersionInfo>;
   getBundlePath(): Promise<string | null>;
   clearUpdates(): Promise<CodePushDownloadResult>;
+  applyUpdate(): void;
 }
 
 // Типы для серверных запросов
@@ -72,4 +73,15 @@ export interface ServerStatusResponse {
   uptime: number;
   updatesCount: number;
   timestamp: string;
+}
+
+export enum CodePushSyncStatus {
+  UP_TO_DATE, // Already running the latest version.
+  UPDATE_DOWNLOADED, // The update was downloaded and is ready to be installed on next restart.
+  ERROR,
+}
+
+export interface CodePushSyncResult {
+  status: CodePushSyncStatus;
+  message?: string;
 }

@@ -5,6 +5,8 @@ import {
   CodePushDownloadResult,
   CodePushVersionInfo,
   CodePushConstants,
+  CodePushSyncResult,
+  CodePushSyncStatus,
 } from './types';
 
 // Интерфейс для нативного модуля
@@ -15,6 +17,7 @@ interface CodePushNativeModule extends CodePushManagerInterface {
   getCurrentVersion(): Promise<CodePushVersionInfo>;
   getBundlePath(): Promise<string | null>;
   clearUpdates(): Promise<CodePushDownloadResult>;
+  getAppVersion(): Promise<string>;
 }
 
 // Получаем нативный модуль
@@ -37,14 +40,20 @@ class CodePushManagerFallback implements CodePushManagerInterface {
     };
   }
 
+  async getAppVersion(): Promise<string> {
+    console.warn('CodePush: Нативный модуль недоступен, getAppVersion fallback');
+    return '0.0.0'; // Возвращаем запасную версию
+  }
+
   async checkForUpdate(): Promise<CodePushUpdate> {
     console.warn(
       '🔍 CodePush: Нативный модуль недоступен, используем fallback',
     );
 
     try {
+      const appVersion = await this.getAppVersion();
       const url =
-        'http://192.168.0.160:3000/api/check-update?currentVersion=0&platform=ios';
+        `http://192.168.0.160:3000/api/check-update?appVersion=${appVersion}&platform=${Platform.OS}`;
       console.log('CodePush: Отправляем запрос на:', url);
 
       // Пытаемся проверить обновления через fetch
@@ -97,6 +106,12 @@ class CodePushManagerFallback implements CodePushManagerInterface {
       message: 'Нативный модуль CodePush недоступен',
     };
   }
+
+  applyUpdate(): void {
+    console.warn(
+      'CodePush: Нативный модуль недоступен, applyUpdate fallback',
+    );
+  }
 }
 
 // Создаем экземпляр менеджера
@@ -129,11 +144,6 @@ export class CodePush {
   public async checkForUpdate(): Promise<CodePushUpdate> {
     try {
       console.log('🔍 CodePush: Проверка обновлений...');
-      console.log('🔍 CodePush: Менеджер:', this.manager);
-      console.log(
-        '🔍 CodePush: Нативный модуль доступен:',
-        isNativeModuleAvailable,
-      );
       const result = await this.manager.checkForUpdate();
       console.log('🔍 CodePush: Результат проверки:', result);
       return result;
@@ -205,37 +215,68 @@ export class CodePush {
     }
   }
 
+  // Получить нативную версию приложения
+  public async getAppVersion(): Promise<string> {
+    try {
+      const version = await this.manager.getAppVersion();
+      console.log('CodePush: Нативная версия приложения:', version);
+      return version;
+    } catch (error) {
+      console.error('CodePush: Ошибка при получении нативной версии:', error);
+      return 'unknown';
+    }
+  }
+
   // Автоматическая проверка и загрузка обновлений
-  public async sync(): Promise<void> {
+  public async sync(): Promise<CodePushSyncResult> {
     try {
       console.log('CodePush: Начинаем синхронизацию...');
-
-      // Проверяем наличие обновлений
       const updateInfo = await this.checkForUpdate();
 
       if (updateInfo.hasUpdate) {
         console.log('CodePush: Найдено обновление, начинаем загрузку...');
-
-        // Скачиваем обновление
         const downloadResult = await this.downloadUpdate();
 
         if (downloadResult.success) {
           console.log('CodePush: Обновление успешно загружено!');
-          console.log(
-            'CodePush: Перезапустите приложение для применения обновления',
-          );
+          return {
+            status: CodePushSyncStatus.UPDATE_DOWNLOADED,
+            message: `Обновление ${downloadResult.version} загружено.`,
+          };
         } else {
           console.error(
             'CodePush: Ошибка при загрузке обновления:',
             downloadResult.message,
           );
+          return {
+            status: CodePushSyncStatus.ERROR,
+            message: `Ошибка загрузки: ${downloadResult.message}`,
+          };
         }
       } else {
         console.log('CodePush: Обновления не найдены');
+        return {
+          status: CodePushSyncStatus.UP_TO_DATE,
+          message: updateInfo.message || 'Приложение уже обновлено.',
+        };
       }
     } catch (error) {
       console.error('CodePush: Ошибка при синхронизации:', error);
+      return {
+        status: CodePushSyncStatus.ERROR,
+        message: `Критическая ошибка: ${error.message}`,
+      };
     }
+  }
+
+  // Применить обновление
+  public applyUpdate(): void {
+    if (!isNativeModuleAvailable) {
+      console.warn('CodePush: Нативный модуль недоступен, applyUpdate невозможен');
+      return;
+    }
+    console.log('CodePush: Запрос на перезагрузку бандла...');
+    this.manager.applyUpdate();
   }
 
   // Проверить доступность нативного модуля

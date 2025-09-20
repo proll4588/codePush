@@ -3,6 +3,9 @@
 export { default as CodePush } from './CodePushManager';
 export { CodePush as CodePushClass } from './CodePushManager';
 
+// Экспорт enum
+export { CodePushSyncStatus } from './types';
+
 // Экспорт типов
 export type {
   CodePushUpdate,
@@ -13,6 +16,7 @@ export type {
   ServerCheckUpdateResponse,
   ServerUploadResponse,
   ServerStatusResponse,
+  CodePushSyncResult,
 } from './types';
 
 // Экспорт утилит

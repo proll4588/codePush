@@ -19,4 +19,9 @@ RCT_EXTERN_METHOD(getBundlePath:(RCTPromiseResolveBlock)resolve
 RCT_EXTERN_METHOD(clearUpdates:(RCTPromiseResolveBlock)resolve
                   reject:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(getAppVersion:(RCTPromiseResolveBlock)resolve
+                  reject:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(applyUpdate)
+
 @end

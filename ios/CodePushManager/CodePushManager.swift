@@ -59,54 +59,69 @@ class CodePushManager: NSObject {
     }
   }
   
-  // MARK: - Public Methods
+    // MARK: - Public Methods
   
-  @objc
-  func checkForUpdate(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-    print("🔍 CodePush Swift: Начинаем проверку обновлений...")
-    
-    // Всегда пытаемся проверить обновления на сервере, даже если нет метаданных
-    let currentVersion = "0" // По умолчанию версия 0
-    let platform = "ios"
-    
-    let urlString = "\(serverURL)/api/check-update?currentVersion=\(currentVersion)&platform=\(platform)"
-    print("🔍 CodePush Swift: URL запроса:", urlString)
-    
-    guard let url = URL(string: urlString) else {
-      print("🔍 CodePush Swift: Ошибка создания URL")
-      reject("INVALID_URL", "Неверный URL сервера", nil)
-      return
-    }
-    
-    print("🔍 CodePush Swift: Отправляем запрос на сервер...")
-    let task = URLSession.shared.dataTask(with: url) { data, response, error in
-      if let error = error {
-        print("🔍 CodePush Swift: Ошибка сети:", error.localizedDescription)
-        reject("NETWORK_ERROR", "Ошибка сети: \(error.localizedDescription)", error)
-        return
-      }
-      
-      guard let data = data else {
-        print("🔍 CodePush Swift: Нет данных от сервера")
-        reject("NO_DATA", "Нет данных от сервера", nil)
-        return
-      }
-      
-      print("🔍 CodePush Swift: Получены данные от сервера, размер:", data.count)
-      
-      do {
-        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
-        print("🔍 CodePush Swift: Парсинг JSON успешен:", json)
-        resolve(json)
-      } catch {
-        print("🔍 CodePush Swift: Ошибка парсинга JSON:", error.localizedDescription)
-        reject("JSON_ERROR", "Ошибка парсинга JSON: \(error.localizedDescription)", error)
+    @objc
+    func getAppVersion(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+      if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+        resolve(appVersion)
+      } else {
+        reject("APP_VERSION_ERROR", "Не удалось получить версию приложения", nil)
       }
     }
-    
-    task.resume()
-  }
   
+      @objc
+      func checkForUpdate(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        print("🔍 CodePush Swift: Начинаем проверку обновлений...")
+    
+        guard let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String else {
+            reject("APP_VERSION_ERROR", "Не удалось определить версию приложения", nil)
+            return
+        }
+    
+        let platform = "ios"
+        var isTestBuild = "false"
+        #if TEST_BUILD
+          isTestBuild = "true"
+        #endif
+        
+        let urlString = "\(serverURL)/api/check-update?appVersion=\(appVersion)&platform=\(platform)&isTestBuild=\(isTestBuild)"
+        print("🔍 CodePush Swift: URL запроса:", urlString)
+        
+        guard let url = URL(string: urlString) else {
+          print("🔍 CodePush Swift: Ошибка создания URL")
+          reject("INVALID_URL", "Неверный URL сервера", nil)
+          return
+        }
+        
+        print("🔍 CodePush Swift: Отправляем запрос на сервер...")
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+          if let error = error {
+            print("🔍 CodePush Swift: Ошибка сети:", error.localizedDescription)
+            reject("NETWORK_ERROR", "Ошибка сети: \(error.localizedDescription)", error)
+            return
+          }
+          
+          guard let data = data else {
+            print("🔍 CodePush Swift: Нет данных от сервера")
+            reject("NO_DATA", "Нет данных от сервера", nil)
+            return
+          }
+          
+          print("🔍 CodePush Swift: Получены данные от сервера, размер:", data.count)
+          
+          do {
+            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+            print("🔍 CodePush Swift: Парсинг JSON успешен:", json)
+            resolve(json)
+          } catch {
+            print("🔍 CodePush Swift: Ошибка парсинга JSON:", error.localizedDescription)
+            reject("JSON_ERROR", "Ошибка парсинга JSON: \(error.localizedDescription)", error)
+          }
+        }
+        
+        task.resume()
+      }  
   @objc
   func downloadUpdate(_ resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
     // Сначала проверяем наличие обновлений
@@ -238,5 +253,15 @@ class CodePushManager: NSObject {
       "serverURL": serverURL,
       "codePushPath": codePushPath.path
     ]
+  }
+
+  // MARK: - Update Application
+  public static let CodePushApplyUpdate = Notification.Name("CodePushApplyUpdate")
+
+  @objc
+  func applyUpdate() {
+    DispatchQueue.main.async {
+      NotificationCenter.default.post(name: CodePushManager.CodePushApplyUpdate, object: nil)
+    }
   }
 }
